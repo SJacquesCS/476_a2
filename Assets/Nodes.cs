@@ -5,13 +5,13 @@ using System;
 
 public class Nodes : MonoBehaviour
 {
-
     public float rayThickness;
     public Material rayMat;
 
     private Dictionary<float, GameObject> neighbors;
     private List<GameObject> lines;
     private bool areLinksShown;
+    private GameObject parentNode;
 
     void Start()
     {
@@ -29,13 +29,14 @@ public class Nodes : MonoBehaviour
                 {
                     neighbors.Add(hit.distance, hit.collider.gameObject);
                 }
-                catch (ArgumentException e)
+                catch (ArgumentException)
                 {
                     continue;
                 }
             }
         }
 
+        parentNode = null;
         areLinksShown = false;
     }
 
@@ -64,8 +65,8 @@ public class Nodes : MonoBehaviour
                 line.AddComponent<LineRenderer>();
                 LineRenderer lineRenderer = line.GetComponent<LineRenderer>();
                 lineRenderer.material = rayMat;
-                lineRenderer.startWidth = 0.25f;
-                lineRenderer.endWidth = 0.25f;
+                lineRenderer.startWidth = 1;
+                lineRenderer.endWidth = 1;
                 lineRenderer.SetPosition(0, transform.position);
                 lineRenderer.SetPosition(1, neighbor.Value.transform.position);
                 lines.Add(line);
@@ -73,5 +74,20 @@ public class Nodes : MonoBehaviour
         }
 
         areLinksShown = !areLinksShown;
+    }
+
+    public Dictionary<float, GameObject> GetNeighbors()
+    {
+        return neighbors;
+    }
+
+    public GameObject Getparent()
+    {
+        return parentNode;
+    }
+
+    public void SetParent(GameObject parent)
+    {
+        parentNode = parent;
     }
 }
