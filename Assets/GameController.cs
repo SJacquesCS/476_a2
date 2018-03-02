@@ -6,8 +6,21 @@ public class GameController : MonoBehaviour {
 
     private GameObject[] nodes;
 
-	void Start () {
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+            StartCoroutine(RandomDijkstra());
+    }
+
+    IEnumerator RandomDijkstra()
+    {
         nodes = GameObject.FindGameObjectsWithTag("node");
+        Debug.Log("START");
+
+        yield return new WaitForSeconds(0.5f);
+
+        foreach (GameObject node in nodes)
+            node.GetComponent<MeshRenderer>().material.color = Color.white;
 
         int rand_1 = Random.Range(0, nodes.Length);
         int rand_2;
@@ -15,6 +28,8 @@ public class GameController : MonoBehaviour {
         do
         {
             rand_2 = Random.Range(0, nodes.Length);
+            Debug.Log(rand_1 + ", " + rand_2);
+            yield return new WaitForSeconds(0.5f);
         }
         while (rand_2 == rand_1);
 
@@ -22,13 +37,19 @@ public class GameController : MonoBehaviour {
         startNode.GetComponent<MeshRenderer>().material.color = Color.green;
         endNode.GetComponent<MeshRenderer>().material.color = Color.red;
 
-        StartCoroutine(Dijkstra(startNode, endNode));
-	}
+        yield return new WaitForSeconds(0.5f);
 
-    IEnumerator Dijkstra(GameObject start, GameObject end)
+        Debug.Log("BEFORE DIJK");
+
+        Dijkstra(startNode, endNode);
+
+        yield return new WaitForSeconds(0.5f);
+
+        Debug.Log("END");
+    }
+
+    private void Dijkstra(GameObject start, GameObject end)
     {
-        yield return new WaitForSeconds(1.5f);
-
         Dictionary<GameObject, float> openList = new Dictionary<GameObject, float>
         {
             { start, 0 }
@@ -53,9 +74,7 @@ public class GameController : MonoBehaviour {
                 }
             }
 
-            yield return new WaitForSeconds(0.05f);
-
-            if (openList.ContainsKey(end))
+            if (currentNode.name == end.name)
                 break;
 
             openList.Remove(currentNode);
@@ -80,9 +99,15 @@ public class GameController : MonoBehaviour {
                 }
                 else if (openList.ContainsKey(entry.Value))
                 {
-                    entry.Value.GetComponent<Nodes>().SetParent(entry.Value);
-                    openList.Remove(entry.Value);
-                    openList.Add(entry.Value, costSoFar + entry.Key);
+                    float cost;
+                    openList.TryGetValue(entry.Value, out cost);
+
+                    if (cost > costSoFar + entry.Key)
+                    {
+                        entry.Value.GetComponent<Nodes>().SetParent(currentNode);
+                        openList.Remove(entry.Value);
+                        openList.Add(entry.Value, costSoFar + entry.Key);
+                    }
                 }
             }
 
