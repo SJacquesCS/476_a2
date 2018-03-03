@@ -4,20 +4,32 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour {
 
-    private GameObject[] nodes;
+    public Material rayMat;
+
+    private bool isDoingDijkstra;
+    private List<GameObject> lines;
+
+    private void Start()
+    {
+        //lines = new List<GameObject>();
+        //isDoingDijkstra = false;
+    }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-            StartCoroutine(RandomDijkstra());
+        //if (Input.GetKeyDown(KeyCode.Space) && !isDoingDijkstra)
+        //{
+        //    isDoingDijkstra = true;
+        //    RandomDijkstra();
+        //    isDoingDijkstra = false;
+        //}
     }
 
-    IEnumerator RandomDijkstra()
+    private void RandomDijkstra()
     {
-        nodes = GameObject.FindGameObjectsWithTag("node");
-        Debug.Log("START");
+        GameObject[] nodes;
 
-        yield return new WaitForSeconds(0.5f);
+        nodes = GameObject.FindGameObjectsWithTag("node");
 
         foreach (GameObject node in nodes)
             node.GetComponent<MeshRenderer>().material.color = Color.white;
@@ -28,8 +40,6 @@ public class GameController : MonoBehaviour {
         do
         {
             rand_2 = Random.Range(0, nodes.Length);
-            Debug.Log(rand_1 + ", " + rand_2);
-            yield return new WaitForSeconds(0.5f);
         }
         while (rand_2 == rand_1);
 
@@ -37,15 +47,7 @@ public class GameController : MonoBehaviour {
         startNode.GetComponent<MeshRenderer>().material.color = Color.green;
         endNode.GetComponent<MeshRenderer>().material.color = Color.red;
 
-        yield return new WaitForSeconds(0.5f);
-
-        Debug.Log("BEFORE DIJK");
-
         Dijkstra(startNode, endNode);
-
-        yield return new WaitForSeconds(0.5f);
-
-        Debug.Log("END");
     }
 
     private void Dijkstra(GameObject start, GameObject end)
@@ -73,9 +75,6 @@ public class GameController : MonoBehaviour {
                     currentNode = entry.Key;
                 }
             }
-
-            if (currentNode.name == end.name)
-                break;
 
             openList.Remove(currentNode);
 
@@ -128,12 +127,30 @@ public class GameController : MonoBehaviour {
             end.GetComponent<MeshRenderer>().material.color = Color.red;
         }
 
-        GameObject parent = end.GetComponent<Nodes>().Getparent();
+        GameObject parent = end;
 
-        while (parent != null)
+        foreach (GameObject line in lines)
+            Destroy(line);
+
+        lines.Clear();
+
+        while (parent != null && parent.name != start.name)
         {
             parent.GetComponent<MeshRenderer>().material.color = Color.yellow;
-            parent = parent.GetComponent<Nodes>().Getparent();
+            GameObject newParent = parent.GetComponent<Nodes>().Getparent();
+
+            GameObject line = new GameObject();
+            line.AddComponent<LineRenderer>();
+            LineRenderer lineRenderer = line.GetComponent<LineRenderer>();
+            lineRenderer.material = rayMat;
+            lineRenderer.material.color = Color.yellow;
+            lineRenderer.startWidth = 1;
+            lineRenderer.endWidth = 1;
+            lineRenderer.SetPosition(0, parent.transform.position);
+            lineRenderer.SetPosition(1, newParent.transform.position);
+            lines.Add(line);
+
+            parent = newParent;
         }
 
         start.GetComponent<MeshRenderer>().material.color = Color.green;

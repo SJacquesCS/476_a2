@@ -12,6 +12,7 @@ public class Nodes : MonoBehaviour
     private List<GameObject> lines;
     private bool areLinksShown;
     private GameObject parentNode;
+    private GameObject childNode;
 
     void Start()
     {
@@ -37,6 +38,7 @@ public class Nodes : MonoBehaviour
         }
 
         parentNode = null;
+        childNode = null;
         areLinksShown = false;
     }
 
@@ -89,5 +91,15 @@ public class Nodes : MonoBehaviour
     public void SetParent(GameObject parent)
     {
         parentNode = parent;
+    }
+
+    public GameObject GetChild()
+    {
+        return childNode;
+    }
+
+    public void SetChild(GameObject child)
+    {
+        childNode = child;
     }
 }
